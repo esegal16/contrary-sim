@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Contrary Sim
 
-## Getting Started
+A multiplayer AI geopolitics simulation game built for the [Contrary Research](https://contrary.com) retreat. Five teams role-play as global actors navigating the AI race from 2026-2028. An LLM game master resolves each round based on all teams' simultaneous secret decisions.
 
-First, run the development server:
+**Live:** [contrary-sim.vercel.app](https://contrary-sim.vercel.app)
+
+## The Game
+
+Inspired by [AI 2027](https://ai-2027.com/) and Bridgewater's trading simulations. 15 players split into 5 teams, each representing a major actor in the global AI race:
+
+| Team | Role | Win Condition |
+|------|------|---------------|
+| **United States Government** | NSC & executive branch | Maintain AI leadership, domestic stability, global influence |
+| **People's Republic of China** | CCP Central Leading Group on AI | Close the compute gap, achieve strategic autonomy |
+| **OpenBrain** | World's leading AI lab (OpenAI analog) | Stay at the frontier, grow revenue, keep regulatory freedom |
+| **Prometheus AI** | Safety-focused frontier lab (Anthropic analog) | Prove safe AI can win, shape regulation, maintain public trust |
+| **EU & Global Coalition** | EU Commission + allied nations | Establish global AI governance, prevent unilateral dominance |
+
+### Round Structure (~6 min each, 6 rounds total)
+
+1. **Briefing** (30s) -- Master screen shows updated world state
+2. **Open Forum** (2 min) -- All teams discuss publicly, UN-style
+3. **Private Caucus** (2 min) -- Teams break out for side deals and scheming
+4. **Submit Actions** (1-2 min) -- Each team privately submits 1-3 strategic actions
+5. **Resolution** -- Claude processes all actions, narrates outcomes, updates metrics
+
+Each round covers ~6 months, from mid-2026 through mid-2028. The AI escalates: early rounds are about positioning, late rounds get existential.
+
+## How It Works
+
+- **Master view** (`/master`) -- displayed on a TV. Shows world state, global metrics, team scores, phase controls.
+- **Team terminals** (`/team`) -- one per team on a phone/laptop. Shows private briefing, metrics, action input.
+- **Rules** (`/rules`) -- full game manual with scenario context.
+- **Briefings** (`/briefing`) -- classified per-team instructions with intel, assets, vulnerabilities, and strategy guides.
+
+Teams join via 6-character codes displayed on the master screen. All state syncs in real-time via Supabase.
+
+The game master is Claude (Sonnet), prompted with the full world state, all teams' metrics, action history, and the AI 2027 scenario logic. It evaluates plausibility, simulates interactions between all teams' actions, and produces narrative outcomes with metric updates.
+
+## Tech Stack
+
+- **Frontend:** Next.js 16 + Tailwind CSS
+- **Backend:** Supabase (Postgres + Realtime)
+- **AI:** Anthropic Claude API (game master resolution)
+- **Hosting:** Vercel
+
+## Setup
+
+```bash
+git clone https://github.com/esegal16/contrary-sim.git
+cd contrary-sim
+npm install
+```
+
+Create `.env.local`:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+Set up the database (requires [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started)):
+
+```bash
+supabase link --project-ref your_project_ref
+supabase db push
+```
+
+Run locally:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database Schema
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `sim_games` -- game state, current round, world state JSON
+- `sim_teams` -- team roles, metrics, join codes, secret briefings
+- `sim_rounds` -- round phases, narratives, world state snapshots
+- `sim_actions` -- team submissions per round
+- `sim_messages` -- inter-team private messages (optional)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All tables have Supabase Realtime enabled for live sync between master and team views.
 
-## Learn More
+## Key Design Decisions
 
-To learn more about Next.js, take a look at the following resources:
+- **Natural language actions** -- teams type what they want to do in plain English. The LLM interprets intent, which allows creative strategies the designers didn't anticipate.
+- **Simultaneous submission** -- all teams submit privately before resolution. This creates a prisoner's dilemma dynamic where public posturing can diverge from private action.
+- **Asymmetric win conditions** -- each team optimizes different metrics. There's no single leaderboard, which means "winning" looks different for everyone and creates natural tension.
+- **Escalating timeline** -- the AI 2027 scenario provides a plausible escalation arc. Early rounds feel strategic; late rounds feel urgent.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
