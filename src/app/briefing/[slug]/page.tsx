@@ -163,13 +163,13 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
     subtitle: "The Safety-Focused Frontier Lab",
     color: "text-purple-400",
     borderColor: "border-purple-500/30",
-    role: "You are the conscience of the AI race — and you need to make money doing it. You believe alignment must keep pace with capabilities, and you've built a brand around responsible development. You're slightly behind OpenBrain, but you have the government's trust, a potential interpretability breakthrough, and the moral high ground. The question is whether the moral high ground is worth anything when the race gets existential.",
-    winCondition: "Ensure alignment quality keeps pace with capabilities. Maintain capability parity with OpenBrain (you can't influence the race if you're irrelevant). Shape policy in your favor. Build public trust as the 'responsible' AI company.",
+    role: "You are the conscience of the AI race — and you're running out of money doing it. You believe alignment must keep pace with capabilities, and you've built a brand around responsible development. You're behind OpenBrain, you have the government's trust and a potential interpretability breakthrough — but your board is getting nervous about the revenue gap. The moral high ground doesn't pay salaries.",
+    winCondition: "Ensure alignment quality keeps pace with capabilities. Maintain capability parity with OpenBrain (you can't influence the race if you're irrelevant). Shape policy in your favor. Keep the lights on — your funding runway is shorter than you'd like.",
     metrics: [
       { name: "Alignment Quality", value: 75, description: "The actual safety of your deployed systems. Based on interpretability, testing rigor, and honesty of your own assessments. The one metric you can't fake." },
-      { name: "Capability Parity", value: 60, description: "How close your models are to OpenBrain's frontier. If this drops below 40, you're no longer a frontier lab — you're a research institute with opinions." },
-      { name: "Policy Influence", value: 70, description: "Your ability to shape AI regulation. Government trust, Congressional relationships, international standards bodies. You're the lab that regulators call first." },
-      { name: "Public Trust", value: 80, description: "Brand perception as the 'safe' AI company. Your biggest asset — and your biggest liability if you ship something unsafe." },
+      { name: "Capability Parity", value: 55, description: "How close your models are to OpenBrain's frontier. If this drops below 40, you're no longer a frontier lab — you're a research institute with opinions." },
+      { name: "Policy Influence", value: 65, description: "Your ability to shape AI regulation. Government trust, Congressional relationships, international standards bodies. You're the lab that regulators call first." },
+      { name: "Funding Runway", value: 45, description: "How long you can survive without a major revenue increase. Declines unless you ship commercial products. Below 25 = forced down round, layoffs, or acquisition. Your board has warned: $5B+ annual revenue by mid-2027 or face restructuring." },
     ],
     intelligence: [
       "Your constitutional AI approach works well through Agent-2-level models. But your chief scientist has privately told you it probably doesn't scale to Agent-3+. You don't know what to do about this yet.",

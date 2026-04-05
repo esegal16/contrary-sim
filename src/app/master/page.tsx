@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Game, Team, Round, Action } from "@/lib/types";
 import { ROUND_TIMELINE } from "@/lib/game-config";
+import { MetricDelta } from "@/components/metric-delta";
 
 const PHASE_LABELS: Record<string, string> = {
   briefing: "BRIEFING",
@@ -308,7 +309,10 @@ export default function MasterView() {
                 {Object.entries(team.metrics).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between text-[10px] sm:text-xs">
                     <span className="text-slate-500 truncate mr-2">{key}</span>
-                    <span className="font-mono font-semibold text-slate-300">{value as number}</span>
+                    <span className="font-mono font-semibold text-slate-300">
+                      {value as number}
+                      <MetricDelta current={value as number} previous={team.previous_metrics?.[key] as number} />
+                    </span>
                   </div>
                 ))}
               </div>
@@ -380,11 +384,43 @@ export default function MasterView() {
 
       {/* Game over */}
       {game.status === "finished" && (
-        <div className="card glow-amber p-6 sm:p-8 mt-4 sm:mt-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent mb-3">
-            SIMULATION COMPLETE
-          </h2>
-          <p className="text-slate-500">Final world state: {ws.year}</p>
+        <div className="mt-4 sm:mt-6 space-y-4">
+          <div className="card glow-amber p-6 sm:p-8 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent mb-3">
+              SIMULATION COMPLETE
+            </h2>
+            <p className="text-slate-500 mb-4">Final world state: {ws.year}</p>
+            {/* Final standings */}
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+              {[...teams]
+                .sort((a, b) => {
+                  const totalA = Object.values(a.metrics).reduce((s, v) => s + (v as number), 0);
+                  const totalB = Object.values(b.metrics).reduce((s, v) => s + (v as number), 0);
+                  return totalB - totalA;
+                })
+                .map((team, i) => {
+                  const total = Object.values(team.metrics).reduce((s, v) => s + (v as number), 0);
+                  return (
+                    <div key={team.id} className={`card p-3 sm:p-4 text-center ${i === 0 ? "glow-amber" : ""}`}>
+                      <p className="text-2xl sm:text-3xl font-bold font-mono text-white mb-1">
+                        {i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}th`}
+                      </p>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-300 mb-1 truncate max-w-[120px]">{team.name}</p>
+                      <p className="text-lg font-mono font-bold text-blue-400">{total}</p>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+          {/* End-game summary narrative */}
+          {game.final_summary && (
+            <div className="card glow-blue p-5 sm:p-8">
+              <p className="label text-blue-400 mb-3">Post-Game Analysis</p>
+              <p className="text-sm sm:text-base text-slate-200 leading-relaxed whitespace-pre-wrap">
+                {game.final_summary}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

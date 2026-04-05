@@ -6,6 +6,7 @@ export interface Game {
   total_rounds: number;
   world_state: WorldState;
   config: GameConfig;
+  final_summary: string;
   created_at: string;
 }
 
@@ -16,6 +17,7 @@ export interface Team {
   name: string;
   role_description: string;
   metrics: Record<string, number>;
+  previous_metrics: Record<string, number>;
   secret_briefing: string;
   join_code: string;
   created_at: string;

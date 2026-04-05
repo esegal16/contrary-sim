@@ -47,14 +47,14 @@ export const DEFAULT_TEAMS: TeamDefinition[] = [
     slug: "prometheus",
     name: "Prometheus AI",
     role_description:
-      "You are the leadership team of Prometheus AI, the safety-focused frontier lab. You believe alignment must keep pace with capabilities. You're slightly behind OpenBrain but have stronger government trust. You must prove safe AI can win commercially.",
+      "You are the leadership team of Prometheus AI, the safety-focused frontier lab. You believe alignment must keep pace with capabilities. You're slightly behind OpenBrain but have stronger government trust. You must prove safe AI can win commercially — and you're running out of money.",
     secret_briefing:
-      "Your constitutional AI approach shows promising results through Agent-2 level, but your researchers privately doubt it scales to Agent-3+. You have a back-channel to the White House AI advisor. Your latest funding round valued you at $40B but you need to show revenue growth to close the next one. You've discovered a potential breakthrough in interpretability that could be published or kept proprietary.",
+      "Your constitutional AI approach shows promising results through Agent-2 level, but your researchers privately doubt it scales to Agent-3+. You have a back-channel to the White House AI advisor. Your latest funding round valued you at $40B but you need to show revenue growth to close the next one — your board has warned that without $5B+ in annual revenue by mid-2027, you'll face a down round or acquisition. You've discovered a potential breakthrough in interpretability that could be published or kept proprietary.",
     starting_metrics: {
       "Alignment Quality": 75,
-      "Capability Parity": 60,
-      "Policy Influence": 70,
-      "Public Trust": 80,
+      "Capability Parity": 55,
+      "Policy Influence": 65,
+      "Funding Runway": 45,
     },
   },
   {

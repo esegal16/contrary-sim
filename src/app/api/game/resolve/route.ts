@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { resolveRound } from "@/lib/game-master";
+import { resolveRound, generateEndgameSummary } from "@/lib/game-master";
 import { Team, Action, Round } from "@/lib/types";
 
 export async function POST(request: Request) {
   const { gameId } = await request.json();
 
-  // Get game
   const { data: game } = await supabase
     .from("sim_games")
     .select()
@@ -17,27 +16,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
 
-  // Set round phase to resolving
   await supabase
     .from("sim_rounds")
     .update({ phase: "resolving" })
     .eq("game_id", gameId)
     .eq("round_number", game.current_round);
 
-  // Get teams
   const { data: teams } = await supabase
     .from("sim_teams")
     .select()
     .eq("game_id", gameId);
 
-  // Get actions for current round
   const { data: actions } = await supabase
     .from("sim_actions")
     .select()
     .eq("game_id", gameId)
     .eq("round_number", game.current_round);
 
-  // Get previous narratives
   const { data: previousRounds } = await supabase
     .from("sim_rounds")
     .select("narrative")
@@ -49,7 +44,6 @@ export async function POST(request: Request) {
     .map((r: Pick<Round, "narrative">) => r.narrative)
     .filter(Boolean);
 
-  // Call LLM to resolve
   const result = await resolveRound(
     game.current_round,
     game.world_state,
@@ -58,7 +52,6 @@ export async function POST(request: Request) {
     previousNarratives
   );
 
-  // Update round with narrative
   await supabase
     .from("sim_rounds")
     .update({
@@ -71,13 +64,12 @@ export async function POST(request: Request) {
     .eq("game_id", gameId)
     .eq("round_number", game.current_round);
 
-  // Update game world state
   await supabase
     .from("sim_games")
     .update({ world_state: result.updated_world_state })
     .eq("id", gameId);
 
-  // Update each team's metrics
+  // Save previous metrics, then update to new metrics
   for (const update of result.team_updates) {
     const team = (teams || []).find(
       (t: Team) => t.slug === update.team_slug
@@ -86,11 +78,35 @@ export async function POST(request: Request) {
       await supabase
         .from("sim_teams")
         .update({
+          previous_metrics: team.metrics,
           metrics: update.metrics,
           secret_briefing: update.private_feedback,
         })
         .eq("id", team.id);
     }
+  }
+
+  // Generate end-game summary if this was the final round
+  if (game.current_round >= game.total_rounds) {
+    const updatedTeams = (teams || []).map((t: Team) => {
+      const update = result.team_updates.find((u) => u.team_slug === t.slug);
+      return update ? { ...t, metrics: update.metrics } : t;
+    });
+
+    const allNarratives = [...previousNarratives, result.narrative];
+
+    const summary = await generateEndgameSummary(
+      result.updated_world_state,
+      updatedTeams as Team[],
+      allNarratives
+    );
+
+    await supabase
+      .from("sim_games")
+      .update({ final_summary: summary, status: "finished" })
+      .eq("id", gameId);
+
+    return NextResponse.json({ result, final_summary: summary });
   }
 
   return NextResponse.json({ result });

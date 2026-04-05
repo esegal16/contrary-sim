@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Game, Team, Round } from "@/lib/types";
+import { MetricDelta } from "@/components/metric-delta";
 
 const PHASE_INSTRUCTIONS: Record<string, string> = {
   briefing: "Review the briefing above. The open forum is about to begin.",
@@ -22,6 +23,8 @@ export default function TeamView() {
   const [joinCode, setJoinCode] = useState("");
   const [joining, setJoining] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pastRounds, setPastRounds] = useState<Round[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const loadTeamState = useCallback(async (teamId: string) => {
     const { data: teamData } = await supabase
@@ -109,6 +112,15 @@ export default function TeamView() {
         }
       }
       if (teamRes.data) setTeam(teamRes.data as Team);
+
+      // Load past resolved rounds for history
+      const { data: resolvedRounds } = await supabase
+        .from("sim_rounds")
+        .select()
+        .eq("game_id", game.id)
+        .eq("phase", "resolved")
+        .order("round_number", { ascending: false });
+      if (resolvedRounds) setPastRounds(resolvedRounds as Round[]);
     }, 3000);
     return () => clearInterval(interval);
   }, [team?.id, game?.id, game?.current_round, currentRound?.round_number, team, game]);
@@ -180,7 +192,10 @@ export default function TeamView() {
           <div key={key} className="card p-2.5 sm:p-3">
             <p className="label mb-1">{key}</p>
             <div className="flex items-center gap-2 sm:gap-3">
-              <p className="text-xl sm:text-2xl font-bold font-mono text-white">{value as number}</p>
+              <p className="text-xl sm:text-2xl font-bold font-mono text-white">
+                {value as number}
+                <MetricDelta current={value as number} previous={team.previous_metrics?.[key] as number} />
+              </p>
               <div className="flex-1 bg-slate-800/50 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-blue-500 h-1.5 rounded-full transition-all duration-700 bar-shimmer"
@@ -271,9 +286,42 @@ export default function TeamView() {
       )}
 
       {game?.status === "finished" && (
-        <div className="card glow-amber p-6 sm:p-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent mb-2">GAME OVER</h2>
-          <p className="text-slate-500 text-sm">Final metrics above.</p>
+        <div className="space-y-3 sm:space-y-4">
+          <div className="card glow-amber p-6 sm:p-8 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent mb-2">GAME OVER</h2>
+            <p className="text-slate-500 text-sm">Final metrics above. Check the master screen for the full analysis.</p>
+          </div>
+          {game.final_summary && (
+            <div className="card glow-blue p-3 sm:p-5">
+              <p className="label text-blue-400 mb-2">Post-Game Analysis</p>
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+                {game.final_summary}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Round History */}
+      {pastRounds.length > 0 && game?.status !== "lobby" && (
+        <div className="mt-3 sm:mt-4">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="btn btn-secondary w-full py-2.5 text-xs sm:text-sm"
+          >
+            {showHistory ? "Hide" : "Show"} Round History ({pastRounds.length} round{pastRounds.length !== 1 ? "s" : ""})
+          </button>
+          {showHistory && (
+            <div className="mt-2 space-y-2">
+              {pastRounds.map((round) => (
+                <div key={round.id} className="card p-3 sm:p-4">
+                  <p className="label text-slate-500 mb-1">Round {round.round_number} — {round.world_state_snapshot?.year}</p>
+                  <p className="text-xs text-slate-400 font-semibold mb-1.5">{round.world_events}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{round.narrative}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
