@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         game_id: gameId,
         round_number: nextRoundNum,
         phase: "briefing",
+        phase_started_at: new Date().toISOString(),
         world_events: `Round ${nextRoundNum}: ${timeline.era} (${timeline.period})`,
         world_state_snapshot: game.world_state,
       })
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
 
   await supabase
     .from("sim_rounds")
-    .update({ phase: nextPhase })
+    .update({ phase: nextPhase, phase_started_at: new Date().toISOString() })
     .eq("id", currentRound.id);
 
   return NextResponse.json({

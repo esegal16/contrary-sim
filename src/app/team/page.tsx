@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Game, Team, Round } from "@/lib/types";
 import { MetricDelta } from "@/components/metric-delta";
+import { CountdownTimer } from "@/components/countdown-timer";
+import { PHASE_DURATIONS } from "@/lib/game-config";
 
 const PHASE_INSTRUCTIONS: Record<string, string> = {
   briefing: "Review the briefing above. The open forum is about to begin.",
@@ -173,6 +175,24 @@ export default function TeamView() {
 
   return (
     <div className="min-h-screen p-3 sm:p-4 max-w-2xl mx-auto pb-8">
+      {/* Timer bar */}
+      {currentRound && PHASE_DURATIONS[currentRound.phase] > 0 && currentRound.phase_started_at && (
+        <div className="card-bright p-3 mb-3 sm:mb-4 flex items-center justify-between">
+          <div>
+            <p className={`text-xs font-semibold uppercase tracking-wider ${
+              currentRound.phase === "submit" ? "text-blue-400" : "text-slate-400"
+            }`}>
+              {currentRound.phase.replace("_", " ")}
+            </p>
+          </div>
+          <CountdownTimer
+            phaseStartedAt={currentRound.phase_started_at}
+            durationSeconds={PHASE_DURATIONS[currentRound.phase]}
+            compact
+          />
+        </div>
+      )}
+
       {/* 1. Who You Are */}
       <div className="card p-4 sm:p-5 mb-3 sm:mb-4">
         <div className="flex items-start justify-between mb-2 gap-2">
@@ -184,6 +204,13 @@ export default function TeamView() {
           )}
         </div>
         <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{team.role_description}</p>
+        {/* Secret objective */}
+        {team.secret_objective && (
+          <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
+            <p className="label text-amber-400 mb-1">Secret Objective</p>
+            <p className="text-xs text-slate-400">{team.secret_objective}</p>
+          </div>
+        )}
       </div>
 
       {/* 2. Metrics */}

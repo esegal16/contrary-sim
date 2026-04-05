@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Game, Team, Round, Action } from "@/lib/types";
-import { ROUND_TIMELINE } from "@/lib/game-config";
+import { ROUND_TIMELINE, PHASE_DURATIONS } from "@/lib/game-config";
 import { MetricDelta } from "@/components/metric-delta";
+import { CountdownTimer } from "@/components/countdown-timer";
 
 const PHASE_LABELS: Record<string, string> = {
   briefing: "BRIEFING",
@@ -215,7 +216,7 @@ export default function MasterView() {
         )}
       </div>
 
-      {/* Phase Banner */}
+      {/* Phase Banner with Timer */}
       {currentRound && (
         <div className={`card-bright p-4 sm:p-6 mb-4 sm:mb-6 ${currentRound.phase === "resolving" ? "glow-amber" : "glow-blue"}`}>
           <div className="flex items-center justify-between">
@@ -228,14 +229,22 @@ export default function MasterView() {
                 {PHASE_DESCRIPTIONS[currentRound.phase]}
               </p>
             </div>
-            {currentRound.phase === "submit" && (
-              <div className="text-right">
-                <p className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">
-                  {actions.length}<span className="text-slate-600">/{teams.length}</span>
-                </p>
-                <p className="label text-emerald-500 hidden sm:block">submitted</p>
-              </div>
-            )}
+            <div className="flex items-center gap-4 sm:gap-6">
+              {currentRound.phase === "submit" && (
+                <div className="text-right">
+                  <p className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">
+                    {actions.length}<span className="text-slate-600">/{teams.length}</span>
+                  </p>
+                  <p className="label text-emerald-500 hidden sm:block">submitted</p>
+                </div>
+              )}
+              {PHASE_DURATIONS[currentRound.phase] > 0 && currentRound.phase_started_at && (
+                <CountdownTimer
+                  phaseStartedAt={currentRound.phase_started_at}
+                  durationSeconds={PHASE_DURATIONS[currentRound.phase]}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -298,35 +307,27 @@ export default function MasterView() {
         </div>
       )}
 
-      {/* Team Scoreboard */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-4 sm:mb-6">
-        {teams.map((team) => {
-          const hasSubmitted = actions.some((a) => a.team_id === team.id);
-          return (
-            <div key={team.id} className={`card p-3 sm:p-4 ${currentRound?.phase === "submit" && hasSubmitted ? "glow-green" : ""}`}>
-              <p className="font-semibold text-xs sm:text-sm mb-2 truncate text-white">{team.name}</p>
-              <div className="space-y-1.5">
-                {Object.entries(team.metrics).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between text-[10px] sm:text-xs">
-                    <span className="text-slate-500 truncate mr-2">{key}</span>
-                    <span className="font-mono font-semibold text-slate-300">
-                      {value as number}
-                      <MetricDelta current={value as number} previous={team.previous_metrics?.[key] as number} />
+      {/* Team Status (fog of war — metrics hidden during gameplay) */}
+      {game.status !== "finished" && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-4 sm:mb-6">
+          {teams.map((team) => {
+            const hasSubmitted = actions.some((a) => a.team_id === team.id);
+            return (
+              <div key={team.id} className={`card p-3 sm:p-4 ${currentRound?.phase === "submit" && hasSubmitted ? "glow-green" : ""}`}>
+                <p className="font-semibold text-xs sm:text-sm truncate text-white">{team.name}</p>
+                <p className="text-[10px] text-slate-600 mt-1">Metrics classified</p>
+                {currentRound?.phase === "submit" && (
+                  <div className="mt-2 pt-2 border-t border-[var(--color-border)]">
+                    <span className={`text-[10px] sm:text-xs font-medium ${hasSubmitted ? "text-emerald-400" : "text-slate-600"}`}>
+                      {hasSubmitted ? "Submitted" : "Waiting..."}
                     </span>
                   </div>
-                ))}
+                )}
               </div>
-              {currentRound?.phase === "submit" && (
-                <div className="mt-2 pt-2 border-t border-[var(--color-border)]">
-                  <span className={`text-[10px] sm:text-xs font-medium ${hasSubmitted ? "text-emerald-400" : "text-slate-600"}`}>
-                    {hasSubmitted ? "Submitted" : "Waiting..."}
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Join Codes (lobby) */}
       {game.status === "lobby" && (
@@ -412,6 +413,41 @@ export default function MasterView() {
                 })}
             </div>
           </div>
+          {/* Full metrics reveal (fog of war lifted) */}
+          <div className="card p-5 sm:p-7">
+            <p className="label text-slate-400 mb-4">Fog of War Lifted — All Team Metrics</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[...teams]
+                .sort((a, b) => {
+                  const totalA = Object.values(a.metrics).reduce((s, v) => s + (v as number), 0);
+                  const totalB = Object.values(b.metrics).reduce((s, v) => s + (v as number), 0);
+                  return totalB - totalA;
+                })
+                .map((team) => (
+                <div key={team.id} className="card-bright p-4">
+                  <p className="font-semibold text-sm text-white mb-2">{team.name}</p>
+                  <div className="space-y-1.5 mb-3">
+                    {Object.entries(team.metrics).map(([key, value]) => (
+                      <div key={key} className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500 truncate mr-2">{key}</span>
+                        <span className="font-mono font-semibold text-slate-300">
+                          {value as number}
+                          <MetricDelta current={value as number} previous={team.previous_metrics?.[key] as number} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {team.secret_objective && (
+                    <div className="pt-2 border-t border-[var(--color-border)]">
+                      <p className="label text-amber-400 mb-1">Secret Objective</p>
+                      <p className="text-[10px] sm:text-xs text-slate-400">{team.secret_objective}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* End-game summary narrative */}
           {game.final_summary && (
             <div className="card glow-blue p-5 sm:p-8">

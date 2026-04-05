@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     name: t.name,
     role_description: t.role_description,
     secret_briefing: t.secret_briefing,
+    secret_objective: t.secret_objective,
     metrics: t.starting_metrics,
   }));
 

@@ -19,6 +19,7 @@ export interface Team {
   metrics: Record<string, number>;
   previous_metrics: Record<string, number>;
   secret_briefing: string;
+  secret_objective: string;
   join_code: string;
   created_at: string;
 }
@@ -31,6 +32,7 @@ export interface Round {
   world_events: string;
   narrative: string;
   world_state_snapshot: WorldState;
+  phase_started_at: string;
   resolved_at: string | null;
   created_at: string;
 }
@@ -79,6 +81,7 @@ export interface TeamDefinition {
   name: string;
   role_description: string;
   secret_briefing: string;
+  secret_objective: string;
   starting_metrics: Record<string, number>;
 }
 
