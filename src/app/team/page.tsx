@@ -83,14 +83,35 @@ export default function TeamView() {
     return () => { supabase.removeChannel(channel); };
   }, [team?.id, game?.id, game?.current_round, team, game, currentRound?.round_number]);
 
-  // Poll for updates every 3s as fallback for realtime
+  // Poll for game/round updates every 3s (doesn't touch action text)
   useEffect(() => {
-    if (!team) return;
-    const interval = setInterval(() => {
-      loadTeamState(team.id);
+    if (!team || !game) return;
+    const interval = setInterval(async () => {
+      const [gameRes, teamRes] = await Promise.all([
+        supabase.from("sim_games").select().eq("id", game.id).single(),
+        supabase.from("sim_teams").select().eq("id", team.id).single(),
+      ]);
+      if (gameRes.data) {
+        const g = gameRes.data as Game;
+        setGame(g);
+        if (g.current_round > 0) {
+          const { data: roundData } = await supabase
+            .from("sim_rounds").select().eq("game_id", g.id).eq("round_number", g.current_round).single();
+          if (roundData) {
+            const r = roundData as Round;
+            // If we moved to a new round, reset submission state
+            if (r.round_number > (currentRound?.round_number || 0)) {
+              setSubmitted(false);
+              setActionText("");
+            }
+            setCurrentRound(r);
+          }
+        }
+      }
+      if (teamRes.data) setTeam(teamRes.data as Team);
     }, 3000);
     return () => clearInterval(interval);
-  }, [team?.id, loadTeamState]);
+  }, [team?.id, game?.id, game?.current_round, currentRound?.round_number, team, game]);
 
   const submitAction = async () => {
     if (!team || !game || !actionText.trim()) return;
