@@ -110,8 +110,8 @@ export default function RulesPage() {
             },
             {
               name: "Prometheus AI",
-              desc: "The safety-focused frontier lab — think Anthropic. You believe alignment must keep pace with capabilities. You're slightly behind OpenBrain but you have the government's trust and a potential interpretability breakthrough.",
-              goal: "Prove safe AI can win commercially. Shape regulation in your favor. If alignment breaks, make sure the world knows before it's too late.",
+              desc: "The safety-focused frontier lab — think Anthropic. You believe alignment must keep pace with capabilities. You're behind OpenBrain, you have the government's trust and a potential interpretability breakthrough — but you're running out of money.",
+              goal: "Prove safe AI can win commercially — without going bankrupt. Shape regulation in your favor. If alignment breaks, make sure the world knows before it's too late.",
             },
             {
               name: "EU & Global Coalition",
@@ -214,6 +214,50 @@ export default function RulesPage() {
           Aggressive moves create backlash. Cooperation creates vulnerability. Hoarding information creates blind spots.
           There are no free moves.
         </p>
+      </section>
+
+      {/* Special Mechanics */}
+      <section className="card p-5 sm:p-7 mb-4 sm:mb-6 print-break">
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-4 print:text-black">Special Mechanics</h2>
+
+        <div className="space-y-4">
+          <div className="card-bright p-4">
+            <h3 className="font-semibold text-white text-sm mb-1 print:text-black">Fog of War</h3>
+            <p className="text-xs sm:text-sm text-slate-400 print:text-gray-600">
+              The TV screen does <strong className="text-white print:text-black">not</strong> show any team&apos;s metrics during the game.
+              You can only see your own scores on your device. Nobody knows how anyone else is doing.
+              This means the open forum is a negotiation under genuine uncertainty — you can bluff about your position.
+              All metrics are revealed at the end of the game.
+            </p>
+          </div>
+
+          <div className="card-bright p-4">
+            <h3 className="font-semibold text-white text-sm mb-1 print:text-black">Countdown Timers</h3>
+            <p className="text-xs sm:text-sm text-slate-400 print:text-gray-600">
+              Every phase has a visible countdown on both the TV and your device. Briefing is 30 seconds.
+              Open Forum, Caucus, and Submit are each 2 minutes. The timer turns red at 15 seconds
+              and pulses when expired. The game master advances phases manually — use the time wisely.
+            </p>
+          </div>
+
+          <div className="card-bright p-4">
+            <h3 className="font-semibold text-white text-sm mb-1 print:text-black">Secret Objectives</h3>
+            <p className="text-xs sm:text-sm text-slate-400 print:text-gray-600">
+              Each team has a <strong className="text-white print:text-black">hidden personal win condition</strong> shown
+              only on your device. These are revealed to everyone at the end of the game. Your secret objective
+              might explain why you made decisions that seemed irrational to other teams.
+              Achieving your secret objective is separate from your metric scores — both matter.
+            </p>
+          </div>
+
+          <div className="card-bright p-4">
+            <h3 className="font-semibold text-white text-sm mb-1 print:text-black">Metric Deltas</h3>
+            <p className="text-xs sm:text-sm text-slate-400 print:text-gray-600">
+              After each round, your metrics show <span className="text-emerald-400">+12</span> or <span className="text-red-400">-8</span> change
+              indicators so you can see exactly how your actions (and everyone else&apos;s) affected your position.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Strategy Tips */}

@@ -180,7 +180,7 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
     ],
     assets: [
       "Government trust — you're the lab that regulators and policymakers believe is telling them the truth",
-      "Safety brand — 80% public trust. Your endorsement (or condemnation) of another lab's model carries real weight",
+      "Safety brand — your endorsement (or condemnation) of another lab's model carries real weight with regulators and the public",
       "Interpretability research — potential breakthrough that no one else has",
       "White House back-channel — direct access to the most powerful AI policy decisions",
       "Talent pipeline — OpenBrain's disillusioned researchers see you as the ethical alternative",
