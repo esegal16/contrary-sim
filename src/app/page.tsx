@@ -29,6 +29,15 @@ export default function Home() {
             Join as Team
           </Link>
         </div>
+
+        <div className="flex gap-6 mt-10 justify-center">
+          <Link href="/rules" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+            Rules & Manual
+          </Link>
+          <Link href="/briefing" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+            Team Briefings
+          </Link>
+        </div>
       </div>
     </div>
   );
