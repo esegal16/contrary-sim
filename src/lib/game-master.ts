@@ -2,7 +2,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { WorldState, Team, Action, ResolutionResult } from "./types";
 import { ROUND_TIMELINE } from "./game-config";
 
-const anthropic = new Anthropic();
+function getAnthropic() {
+  return new Anthropic();
+}
 
 const SYSTEM_PROMPT = `You are the Game Master for a geopolitical AI simulation game inspired by the AI 2027 scenario (ai-2027.com).
 
@@ -88,7 +90,7 @@ Resolve this round. Return your response as JSON matching this exact structure:
 
 Return ONLY valid JSON, no markdown fences or extra text.`;
 
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 4000,
     system: SYSTEM_PROMPT,

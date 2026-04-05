@@ -64,13 +64,11 @@ export default function MasterView() {
     }
   }, []);
 
-  // Check for existing game on mount
   useEffect(() => {
     const gameId = new URLSearchParams(window.location.search).get("game");
     if (gameId) loadGame(gameId);
   }, [loadGame]);
 
-  // Realtime subscriptions
   useEffect(() => {
     if (!game) return;
 
@@ -162,17 +160,16 @@ export default function MasterView() {
     setLoading(false);
   };
 
-  // No game yet — show create button
   if (!game) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-5xl font-bold mb-4 tracking-tight">ONTARA SIM</h1>
-          <p className="text-gray-400 text-xl mb-8">AI Geopolitics Simulation</p>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 tracking-tight">CONTRARY SIM</h1>
+          <p className="text-gray-400 text-lg sm:text-xl mb-8">AI Geopolitics Simulation</p>
           <button
             onClick={createGame}
             disabled={creating}
-            className="bg-blue-600 hover:bg-blue-500 text-white text-xl px-8 py-4 rounded-lg font-semibold disabled:opacity-50 transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white text-lg sm:text-xl px-8 py-4 rounded-lg font-semibold disabled:opacity-50 transition-colors"
           >
             {creating ? "Creating..." : "Create New Game"}
           </button>
@@ -185,121 +182,99 @@ export default function MasterView() {
   const timeline = game.current_round > 0 ? ROUND_TIMELINE[game.current_round - 1] : null;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-gray-950 text-white p-3 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">ONTARA SIM</h1>
-          <p className="text-gray-500 text-sm">Game: {game.id.slice(0, 8)}</p>
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight">CONTRARY SIM</h1>
+          <p className="text-gray-500 text-xs sm:text-sm">Game: {game.id.slice(0, 8)}</p>
         </div>
         {game.status === "lobby" && (
           <div className="text-right">
-            <p className="text-yellow-400 text-lg font-semibold mb-2">
-              LOBBY — Waiting for teams to join
+            <p className="text-yellow-400 text-sm sm:text-lg font-semibold mb-1">
+              LOBBY
             </p>
-            <p className="text-gray-400 text-sm">
-              {actions.length} / {teams.length} teams connected
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Waiting for teams
             </p>
           </div>
         )}
         {currentRound && (
           <div className="text-right">
-            <p className="text-2xl font-bold">
+            <p className="text-lg sm:text-2xl font-bold">
               Round {game.current_round}/{game.total_rounds}
             </p>
-            <p className="text-gray-400">{timeline?.era}</p>
+            <p className="text-gray-400 text-xs sm:text-base">{timeline?.era}</p>
           </div>
         )}
       </div>
 
       {/* Phase Banner */}
       {currentRound && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 uppercase tracking-widest mb-1">Current Phase</p>
-              <p className="text-3xl font-bold text-blue-400">
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Current Phase</p>
+              <p className="text-xl sm:text-3xl font-bold text-blue-400">
                 {PHASE_LABELS[currentRound.phase] || currentRound.phase}
               </p>
-              <p className="text-gray-400 mt-1">
+              <p className="text-gray-400 text-sm mt-1 hidden sm:block">
                 {PHASE_DESCRIPTIONS[currentRound.phase]}
               </p>
             </div>
             {currentRound.phase === "submit" && (
               <div className="text-right">
-                <p className="text-lg font-semibold text-green-400">
-                  {actions.length} / {teams.length} submitted
+                <p className="text-sm sm:text-lg font-semibold text-green-400">
+                  {actions.length}/{teams.length}
                 </p>
+                <p className="text-xs text-gray-500 hidden sm:block">submitted</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* World State */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">AI Progress</p>
-          <p className="text-3xl font-bold">{ws.global_metrics.ai_progress}</p>
-          <div className="w-full bg-gray-800 rounded-full h-2 mt-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full transition-all"
-              style={{ width: `${ws.global_metrics.ai_progress}%` }}
-            />
+      {/* World State Metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        {[
+          { label: "AI Progress", value: ws.global_metrics.ai_progress, color: "bg-blue-500" },
+          { label: "Econ Stability", value: ws.global_metrics.economic_stability, color: "bg-green-500" },
+          { label: "Alignment", value: ws.global_metrics.alignment_confidence, color: "bg-yellow-500" },
+          { label: "Geo Risk", value: ws.global_metrics.geopolitical_risk, color: "bg-red-500" },
+        ].map((m) => (
+          <div key={m.label} className="bg-gray-900 border border-gray-800 rounded-lg p-3 sm:p-4">
+            <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest mb-1">{m.label}</p>
+            <p className="text-2xl sm:text-3xl font-bold">{m.value}</p>
+            <div className="w-full bg-gray-800 rounded-full h-1.5 sm:h-2 mt-2">
+              <div
+                className={`${m.color} h-1.5 sm:h-2 rounded-full transition-all`}
+                style={{ width: `${m.value}%` }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Economic Stability</p>
-          <p className="text-3xl font-bold">{ws.global_metrics.economic_stability}</p>
-          <div className="w-full bg-gray-800 rounded-full h-2 mt-2">
-            <div
-              className="bg-green-500 h-2 rounded-full transition-all"
-              style={{ width: `${ws.global_metrics.economic_stability}%` }}
-            />
-          </div>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Alignment Confidence</p>
-          <p className="text-3xl font-bold">{ws.global_metrics.alignment_confidence}</p>
-          <div className="w-full bg-gray-800 rounded-full h-2 mt-2">
-            <div
-              className="bg-yellow-500 h-2 rounded-full transition-all"
-              style={{ width: `${ws.global_metrics.alignment_confidence}%` }}
-            />
-          </div>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Geopolitical Risk</p>
-          <p className="text-3xl font-bold">{ws.global_metrics.geopolitical_risk}</p>
-          <div className="w-full bg-gray-800 rounded-full h-2 mt-2">
-            <div
-              className="bg-red-500 h-2 rounded-full transition-all"
-              style={{ width: `${ws.global_metrics.geopolitical_risk}%` }}
-            />
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* World Summary + Events */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="col-span-2 bg-gray-900 border border-gray-800 rounded-lg p-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg p-4 sm:p-5">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">World State — {ws.year}</p>
-          <p className="text-gray-300 leading-relaxed mb-3">{ws.summary}</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm sm:text-base text-gray-300 leading-relaxed mb-3">{ws.summary}</p>
+          <p className="text-xs sm:text-sm text-gray-500">
             AI Level: <span className="text-gray-300">{ws.ai_capability_level}</span>
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             Tension:{" "}
             <span className={TENSION_COLORS[ws.geopolitical_tension]}>
               {ws.geopolitical_tension.toUpperCase()}
             </span>
           </p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-5">
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 sm:p-5">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Key Events</p>
           <ul className="space-y-2">
             {ws.key_events.map((event, i) => (
-              <li key={i} className="text-sm text-gray-300 flex gap-2">
+              <li key={i} className="text-xs sm:text-sm text-gray-300 flex gap-2">
                 <span className="text-blue-400 shrink-0">&#9656;</span>
                 {event}
               </li>
@@ -308,26 +283,26 @@ export default function MasterView() {
         </div>
       </div>
 
-      {/* Narrative (after resolution) */}
+      {/* Narrative */}
       {currentRound?.narrative && (
-        <div className="bg-gray-900 border border-blue-900 rounded-xl p-6 mb-6">
+        <div className="bg-gray-900 border border-blue-900 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
           <p className="text-xs text-blue-400 uppercase tracking-widest mb-3">
             Round {currentRound.round_number} — What Happened
           </p>
-          <p className="text-lg text-gray-200 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm sm:text-lg text-gray-200 leading-relaxed whitespace-pre-wrap">
             {currentRound.narrative}
           </p>
         </div>
       )}
 
       {/* Team Scoreboard */}
-      <div className="grid grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4 sm:mb-6">
         {teams.map((team) => (
-          <div key={team.id} className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-            <p className="font-bold text-sm mb-2 truncate">{team.name}</p>
+          <div key={team.id} className="bg-gray-900 border border-gray-800 rounded-lg p-3 sm:p-4">
+            <p className="font-bold text-xs sm:text-sm mb-2 truncate">{team.name}</p>
             <div className="space-y-1">
               {Object.entries(team.metrics).map(([key, value]) => (
-                <div key={key} className="flex items-center justify-between text-xs">
+                <div key={key} className="flex items-center justify-between text-[10px] sm:text-xs">
                   <span className="text-gray-500 truncate mr-2">{key}</span>
                   <span className="font-mono">{value as number}</span>
                 </div>
@@ -336,7 +311,7 @@ export default function MasterView() {
             {currentRound?.phase === "submit" && (
               <div className="mt-2 pt-2 border-t border-gray-800">
                 <span
-                  className={`text-xs ${
+                  className={`text-[10px] sm:text-xs ${
                     actions.some((a) => a.team_id === team.id)
                       ? "text-green-400"
                       : "text-gray-600"
@@ -354,15 +329,15 @@ export default function MasterView() {
 
       {/* Join Codes (lobby) */}
       {game.status === "lobby" && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
             Team Join Codes — Share with players
           </p>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {teams.map((team) => (
               <div key={team.id} className="text-center">
-                <p className="text-sm font-semibold mb-1">{team.name}</p>
-                <p className="text-2xl font-mono font-bold text-blue-400">
+                <p className="text-xs sm:text-sm font-semibold mb-1 truncate">{team.name}</p>
+                <p className="text-xl sm:text-2xl font-mono font-bold text-blue-400">
                   {team.join_code}
                 </p>
               </div>
@@ -372,12 +347,12 @@ export default function MasterView() {
       )}
 
       {/* Controls */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         {(game.status === "lobby" || currentRound?.phase === "resolved") && (
           <button
             onClick={advancePhase}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold disabled:opacity-50 transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-5 sm:px-6 py-3 rounded-lg font-semibold text-sm sm:text-base disabled:opacity-50 transition-colors"
           >
             {loading
               ? "Loading..."
@@ -394,7 +369,7 @@ export default function MasterView() {
             <button
               onClick={advancePhase}
               disabled={loading}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold disabled:opacity-50 transition-colors"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-5 sm:px-6 py-3 rounded-lg font-semibold text-sm sm:text-base disabled:opacity-50 transition-colors"
             >
               {loading ? "Loading..." : "Next Phase"}
             </button>
@@ -403,18 +378,18 @@ export default function MasterView() {
           <button
             onClick={resolveRound}
             disabled={loading || actions.length === 0}
-            className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold disabled:opacity-50 transition-colors"
+            className="bg-amber-600 hover:bg-amber-500 text-white px-5 sm:px-6 py-3 rounded-lg font-semibold text-sm sm:text-base disabled:opacity-50 transition-colors"
           >
-            {loading ? "Simulating..." : `Resolve Round (${actions.length}/${teams.length} submitted)`}
+            {loading ? "Simulating..." : `Resolve Round (${actions.length}/${teams.length})`}
           </button>
         )}
       </div>
 
       {/* Game over */}
       {game.status === "finished" && (
-        <div className="bg-gray-900 border border-yellow-700 rounded-xl p-8 mt-6 text-center">
-          <h2 className="text-4xl font-bold text-yellow-400 mb-4">SIMULATION COMPLETE</h2>
-          <p className="text-gray-400 text-lg">Final world state: {ws.year}</p>
+        <div className="bg-gray-900 border border-yellow-700 rounded-xl p-6 sm:p-8 mt-4 sm:mt-6 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-4">SIMULATION COMPLETE</h2>
+          <p className="text-gray-400 text-base sm:text-lg">Final world state: {ws.year}</p>
         </div>
       )}
     </div>

@@ -13,8 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ontara Sim — AI Geopolitics Simulation",
+  title: "Contrary Sim — AI Geopolitics Simulation",
   description: "Multiplayer geopolitical AI simulation game for the Contrary Research retreat",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
