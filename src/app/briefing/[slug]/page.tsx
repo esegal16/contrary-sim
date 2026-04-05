@@ -13,7 +13,6 @@ interface TeamBriefing {
   assets: string[];
   vulnerabilities: string[];
   relationships: { team: string; status: string; detail: string }[];
-  roundByRound: string[];
 }
 
 const BRIEFINGS: Record<string, TeamBriefing> = {
@@ -57,11 +56,6 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
       { team: "Prometheus", status: "Trusted partner", detail: "They share your safety concerns and cooperate with your agencies. But they're a company, not a patriotic institution — they'll prioritize survival over your agenda if pushed." },
       { team: "EU Coalition", status: "Formal ally, practical friction", detail: "NATO ally, shared values. But the EU AI Act creates compliance nightmares for your labs, and Europe wants a seat at the table you'd rather keep small." },
     ],
-    roundByRound: [
-      "R1-2: Establish your posture. Tighten or loosen export controls. Decide how much to invest in domestic compute. Set the terms of engagement with your labs.",
-      "R3-4: The crisis zone. AGI gets declared, alignment starts failing, China gets desperate. Every decision has massive consequences. Do you nationalize the labs? Strike Chinese infrastructure? Go to the public?",
-      "R5-6: Endgame. The world you shaped in the early rounds determines what options you have now. A strong alliance network gives you leverage. Isolation leaves you reactive.",
-    ],
   },
 
   "china-gov": {
@@ -103,11 +97,6 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
       { team: "OpenBrain", status: "Target", detail: "Their models are what you need. Your agents are inside. A successful weight theft would be the intelligence coup of the century — but getting caught would be catastrophic." },
       { team: "Prometheus", status: "Potential wedge", detail: "Their safety concerns could be useful to you. If they slow down the US AI program for safety reasons, that narrows the gap without you doing anything." },
       { team: "EU Coalition", status: "Potential partner", detail: "The EU doesn't want American AI hegemony either. There's a deal to be made: your market access in exchange for their regulatory framework. But trust is low." },
-    ],
-    roundByRound: [
-      "R1-2: The window is closing. Execute or defer the weight theft. Invest in domestic chip production. Decide whether to play nice internationally or go aggressive.",
-      "R3-4: The capabilities gap either narrows or widens. If you got the weights, you're in the race. If not, you need an asymmetric strategy — regulation-as-weapon, AI diplomacy with the Global South, or military posturing over Taiwan.",
-      "R5-6: Endgame position depends entirely on rounds 1-4. Strong compute = negotiate from strength. Weak compute = you're either a junior partner or a spoiler.",
     ],
   },
 
@@ -151,11 +140,6 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
       { team: "Prometheus", status: "Rival", detail: "They're poaching your talent by offering them a 'responsible' alternative. They're slower than you, but if they crack interpretability, they could leapfrog you on government contracts." },
       { team: "EU Coalition", status: "Regulatory threat", detail: "The EU AI Act could force you to open-source safety test results, delay releases, or exit European markets entirely. 20% of your enterprise revenue is European." },
     ],
-    roundByRound: [
-      "R1-2: Ship or slow down? Agent-3 is coming. Do you rush it, invest in safety, or try to do both? How much do you share with the government? How do you stop the talent bleed?",
-      "R3-4: Agent-3 goes live and everything changes. The world reacts. Government, public, China — everyone wants a piece. Do you open-source to commoditize (kills revenue but builds moat)? Go exclusive with the US government (safety but loss of independence)?",
-      "R5-6: If alignment holds, you're the most valuable company in history. If it doesn't, you're the most dangerous. Your endgame depends on decisions made in rounds 1-3.",
-    ],
   },
 
   "prometheus": {
@@ -198,11 +182,6 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
       { team: "OpenBrain", status: "Rival with shared fate", detail: "You compete for talent, revenue, and influence. But if they build something dangerous, it's your problem too. You need them to be responsible — or you need the government to make them." },
       { team: "EU Coalition", status: "Natural ally", detail: "You share regulatory values. The EU AI Act was partly designed with your input. But EU regulations also affect your European business." },
     ],
-    roundByRound: [
-      "R1-2: Position yourself. Publish or hoard the interpretability breakthrough? Poach OpenBrain's talent? Use your White House connection to shape early regulation?",
-      "R3-4: The alignment crisis hits. If your safety approach breaks, do you go public and risk crashing the industry? Do you ask the government to step in? Or do you quietly try to fix it while OpenBrain ships anyway?",
-      "R5-6: This is where your early investments in trust and policy pay off — or don't. If the government trusts you, you shape the endgame. If they don't, you're a spectator.",
-    ],
   },
 
   "eu-coalition": {
@@ -244,11 +223,6 @@ const BRIEFINGS: Record<string, TeamBriefing> = {
       { team: "China", status: "Cautious engagement", detail: "You don't trust them, but you need them to join any meaningful global framework. Their market access offers are tempting. Their governance promises are not credible." },
       { team: "OpenBrain", status: "Regulated adversary", detail: "They view your regulations as a cost center. But they need European market access. This gives you leverage — if you're willing to use it." },
       { team: "Prometheus", status: "Natural ally", detail: "You share safety values. They helped design parts of the EU AI Act. A formal partnership could give you credibility on technical safety that you otherwise lack." },
-    ],
-    roundByRound: [
-      "R1-2: Build your coalition. Lock in Japan, South Korea, and others before the US and China can poach them. Use the EU AI Act as a template for global standards. Decide which deals to take from the superpowers.",
-      "R3-4: The AI crisis makes your governance framework either essential or irrelevant. If you've built a credible coalition, you can force both sides to the table. If not, you're watching from the sidelines.",
-      "R5-6: Endgame is international order vs. bilateral power plays. Your coalition either becomes the UN of AI or it fragments. Everything depends on whether you stayed independent or got co-opted.",
     ],
   },
 };
@@ -365,18 +339,6 @@ export default async function BriefingPage({ params }: { params: Promise<{ slug:
                 <span className="label text-slate-500">— {r.status}</span>
               </div>
               <p className="text-xs text-slate-400 print:text-gray-600">{r.detail}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Round-by-Round Guide */}
-      <section className="card p-5 sm:p-7 mb-4 sm:mb-6">
-        <h2 className="text-base sm:text-lg font-bold text-white mb-3 print:text-black">Strategic Guide by Phase</h2>
-        <div className="space-y-3">
-          {brief.roundByRound.map((item, i) => (
-            <div key={i} className="card-bright p-3 sm:p-4">
-              <p className="text-sm text-slate-300 leading-relaxed print:text-gray-700">{item}</p>
             </div>
           ))}
         </div>
