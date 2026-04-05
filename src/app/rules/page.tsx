@@ -160,23 +160,7 @@ export default function RulesPage() {
         </div>
 
         <h3 className="font-semibold text-white text-sm mb-2 print:text-black">Timeline</h3>
-        <p className="text-xs sm:text-sm text-slate-300 mb-3 print:text-gray-700">Each round advances ~6 months. The game covers the critical window from mid-2026 to mid-2028.</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {[
-            { r: 1, period: "Mid 2026", era: "The Compute Race" },
-            { r: 2, period: "Early 2027", era: "Superhuman Capabilities" },
-            { r: 3, period: "Mid 2027", era: "AGI Declared" },
-            { r: 4, period: "Late 2027", era: "Intelligence Explosion" },
-            { r: 5, period: "Early 2028", era: "Crisis Point" },
-            { r: 6, period: "Mid 2028", era: "New World Order" },
-          ].map((t) => (
-            <div key={t.r} className="card-bright p-2.5 sm:p-3 text-center">
-              <p className="font-mono text-blue-400 font-bold text-sm">R{t.r}</p>
-              <p className="text-xs text-white font-medium print:text-black">{t.period}</p>
-              <p className="text-[10px] text-slate-500">{t.era}</p>
-            </div>
-          ))}
-        </div>
+        <p className="text-xs sm:text-sm text-slate-300 print:text-gray-700">6 rounds. Each round advances ~6 months, covering mid-2026 to mid-2028. What happens in each round depends on your decisions.</p>
       </section>
 
       {/* Actions & Scoring */}
