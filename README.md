@@ -13,35 +13,73 @@ Inspired by [AI 2027](https://ai-2027.com/) and Bridgewater's trading simulation
 | **United States Government** | NSC & executive branch | Maintain AI leadership, domestic stability, global influence |
 | **People's Republic of China** | CCP Central Leading Group on AI | Close the compute gap, achieve strategic autonomy |
 | **OpenBrain** | World's leading AI lab (OpenAI analog) | Stay at the frontier, grow revenue, keep regulatory freedom |
-| **Prometheus AI** | Safety-focused frontier lab (Anthropic analog) | Prove safe AI can win, shape regulation, maintain public trust |
+| **Prometheus AI** | Safety-focused frontier lab (Anthropic analog) | Prove safe AI can win commercially — while not running out of money |
 | **EU & Global Coalition** | EU Commission + allied nations | Establish global AI governance, prevent unilateral dominance |
 
 ### Round Structure (~6 min each, 6 rounds total)
 
-1. **Briefing** (30s) -- Master screen shows updated world state
-2. **Open Forum** (2 min) -- All teams discuss publicly, UN-style
-3. **Private Caucus** (2 min) -- Teams break out for side deals and scheming
-4. **Submit Actions** (1-2 min) -- Each team privately submits 1-3 strategic actions
-5. **Resolution** -- Claude processes all actions, narrates outcomes, updates metrics
+| Phase | Duration | What Happens |
+|-------|----------|-------------|
+| **Briefing** | 30s | Master screen shows updated world state and events |
+| **Open Forum** | 2 min | All teams discuss publicly, UN-style. Posture, propose, bluff. |
+| **Private Caucus** | 2 min | Teams break out for side deals and scheming |
+| **Submit Actions** | 2 min | Each team privately submits 1-3 strategic actions |
+| **Resolution** | ~15s | Claude processes all actions, narrates outcomes, updates metrics |
 
 Each round covers ~6 months, from mid-2026 through mid-2028. The AI escalates: early rounds are about positioning, late rounds get existential.
 
-## How It Works
+## Game Mechanics
 
-- **Master view** (`/master`) -- displayed on a TV. Shows world state, global metrics, team scores, phase controls.
-- **Team terminals** (`/team`) -- one per team on a phone/laptop. Shows private briefing, metrics, action input.
-- **Rules** (`/rules`) -- full game manual with scenario context.
-- **Briefings** (`/briefing`) -- classified per-team instructions with intel, assets, vulnerabilities, and strategy guides.
+### Fog of War
+The master screen (TV) hides all team metrics during gameplay. Teams can only see their own scores on their devices. Nobody knows how anyone else is doing — which means the open forum becomes a negotiation under uncertainty. Bluff about your position. Full metrics are revealed at the end of the game.
 
-Teams join via 6-character codes displayed on the master screen. All state syncs in real-time via Supabase.
+### Countdown Timers
+Every timed phase has a visible countdown on both the master screen (large) and team devices (compact). Turns red at 15 seconds. Pulses when expired. The game master controls advancement manually — timers create urgency but don't auto-cut discussions.
 
-The game master is Claude (Sonnet), prompted with the full world state, all teams' metrics, action history, and the AI 2027 scenario logic. It evaluates plausibility, simulates interactions between all teams' actions, and produces narrative outcomes with metric updates.
+### Secret Objectives
+Each team has a hidden personal win condition visible only on their device, revealed to everyone at end-game. These create moments where a team's "weird" decisions suddenly make sense. Examples:
+- *US Gov:* Bilateral agreement with China AND AI Lead above 70
+- *China:* 3+ non-aligned partnerships AND Compute Parity above 65
+- *OpenBrain:* Revenue above 80 AND first to deploy AGI
+- *Prometheus:* Alignment framework as international standard AND Funding Runway above 50
+- *EU:* Get both US AND China to sign a binding treaty
+
+### Metric Deltas
+After each round resolution, all metrics show `+12` or `-8` change indicators so teams can see the impact of their actions.
+
+### Round History
+Teams can expand a collapsible history panel showing all past rounds' narratives — no context gets lost mid-game.
+
+### End-Game Summary
+After round 6, a second LLM call generates a 3-4 paragraph retrospective analysis: who won and why, the pivotal moment, who underperformed, and the state of the world. Displayed on both the master screen and team devices.
+
+## Pages
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing page — Game Master or Join as Team |
+| `/master` | Master view for TV — create game, control phases, resolve rounds |
+| `/team` | Team terminal — join via code, see briefing, submit actions |
+| `/rules` | Full game manual with AI 2027 scenario context |
+| `/briefing` | Index of all 5 classified team briefings |
+| `/briefing/[slug]` | Per-team briefing with intel, assets, vulnerabilities, strategy guide |
+
+## Game Master Prompt Design
+
+The LLM game master is tuned with specific principles:
+
+- **Rewards boldness** — decisive execution beats passive safety. Moving fast with a plan is not the same as being reckless.
+- **Punishes hypocrisy** — publicly advocating safety while privately accelerating development has consequences.
+- **Makes cooperation hard** — treaties require concessions, coalitions have internal friction, enforcement is difficult.
+- **Probabilistic espionage** — weight theft has ~30-40% success rate, not automatic. Failed operations have severe diplomatic costs.
+- **Prometheus is a company** — "Funding Runway" declines without revenue. Pure moralizing without shipping products leads to acquisition or collapse.
+- **Metric caps** — no metric hits 100 before round 5. The higher you climb, the harder you fall.
 
 ## Tech Stack
 
-- **Frontend:** Next.js 16 + Tailwind CSS
-- **Backend:** Supabase (Postgres + Realtime)
-- **AI:** Anthropic Claude API (game master resolution)
+- **Frontend:** Next.js 16, Tailwind CSS, Inter + JetBrains Mono
+- **Backend:** Supabase (Postgres + Realtime for live sync)
+- **AI:** Anthropic Claude API (Sonnet for round resolution + end-game summary)
 - **Hosting:** Vercel
 
 ## Setup
@@ -75,20 +113,23 @@ npm run dev
 
 ## Database Schema
 
-- `sim_games` -- game state, current round, world state JSON
-- `sim_teams` -- team roles, metrics, join codes, secret briefings
-- `sim_rounds` -- round phases, narratives, world state snapshots
-- `sim_actions` -- team submissions per round
-- `sim_messages` -- inter-team private messages (optional)
+| Table | Purpose |
+|-------|---------|
+| `sim_games` | Game state, current round, world state JSON, final summary |
+| `sim_teams` | Team roles, metrics, previous metrics, join codes, secret briefings, secret objectives |
+| `sim_rounds` | Round phases, phase timestamps, narratives, world state snapshots |
+| `sim_actions` | Team submissions per round |
+| `sim_messages` | Inter-team private messages (optional) |
 
-All tables have Supabase Realtime enabled for live sync between master and team views.
+All tables have Supabase Realtime enabled. The app also polls every 3s as a fallback.
 
-## Key Design Decisions
+## Design Decisions
 
-- **Natural language actions** -- teams type what they want to do in plain English. The LLM interprets intent, which allows creative strategies the designers didn't anticipate.
-- **Simultaneous submission** -- all teams submit privately before resolution. This creates a prisoner's dilemma dynamic where public posturing can diverge from private action.
-- **Asymmetric win conditions** -- each team optimizes different metrics. There's no single leaderboard, which means "winning" looks different for everyone and creates natural tension.
-- **Escalating timeline** -- the AI 2027 scenario provides a plausible escalation arc. Early rounds feel strategic; late rounds feel urgent.
+- **Natural language actions** — teams type what they want to do in plain English. The LLM interprets intent, allowing creative strategies the designers didn't anticipate.
+- **Simultaneous submission** — all teams submit privately before resolution. Public posturing can diverge from private action.
+- **Asymmetric win conditions** — each team optimizes different metrics with different secret objectives. "Winning" looks different for everyone.
+- **Fog of war** — hiding metrics from the master screen transforms the open forum from scoreboard-watching into genuine negotiation under uncertainty.
+- **Escalating timeline** — the AI 2027 scenario provides a plausible escalation arc. Early rounds feel strategic; late rounds feel existential.
 
 ## License
 
