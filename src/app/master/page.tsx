@@ -98,6 +98,20 @@ export default function MasterView() {
     return () => { supabase.removeChannel(channel); };
   }, [game?.id, game?.current_round, game]);
 
+  // Poll for action submissions every 3s during submit phase
+  useEffect(() => {
+    if (!game || game.current_round === 0) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("sim_actions")
+        .select()
+        .eq("game_id", game.id)
+        .eq("round_number", game.current_round);
+      if (data) setActions(data as Action[]);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [game?.id, game?.current_round]);
+
   const createGame = async () => {
     setCreating(true);
     const res = await fetch("/api/game/create", {
@@ -112,10 +126,30 @@ export default function MasterView() {
     setCreating(false);
   };
 
+  const refreshState = useCallback(async (gameId: string) => {
+    const [gameRes, teamsRes] = await Promise.all([
+      supabase.from("sim_games").select().eq("id", gameId).single(),
+      supabase.from("sim_teams").select().eq("game_id", gameId),
+    ]);
+    if (gameRes.data) setGame(gameRes.data as Game);
+    if (teamsRes.data) setTeams(teamsRes.data as Team[]);
+
+    const currentRound = gameRes.data?.current_round;
+    if (currentRound > 0) {
+      const [roundRes, actionsRes] = await Promise.all([
+        supabase.from("sim_rounds").select().eq("game_id", gameId).eq("round_number", currentRound).single(),
+        supabase.from("sim_actions").select().eq("game_id", gameId).eq("round_number", currentRound),
+      ]);
+      if (roundRes.data) setCurrentRound(roundRes.data as Round);
+      if (actionsRes.data) setActions(actionsRes.data as Action[]);
+    }
+  }, []);
+
   const advancePhase = async () => {
     if (!game) return;
     setLoading(true);
     await fetch("/api/game/advance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ gameId: game.id }) });
+    await refreshState(game.id);
     setLoading(false);
   };
 
@@ -123,6 +157,7 @@ export default function MasterView() {
     if (!game) return;
     setLoading(true);
     await fetch("/api/game/resolve", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ gameId: game.id }) });
+    await refreshState(game.id);
     setLoading(false);
   };
 

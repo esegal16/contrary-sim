@@ -83,6 +83,15 @@ export default function TeamView() {
     return () => { supabase.removeChannel(channel); };
   }, [team?.id, game?.id, game?.current_round, team, game, currentRound?.round_number]);
 
+  // Poll for updates every 3s as fallback for realtime
+  useEffect(() => {
+    if (!team) return;
+    const interval = setInterval(() => {
+      loadTeamState(team.id);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [team?.id, loadTeamState]);
+
   const submitAction = async () => {
     if (!team || !game || !actionText.trim()) return;
     setSubmitting(true);
