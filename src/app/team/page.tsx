@@ -161,7 +161,7 @@ export default function TeamView() {
 
   return (
     <div className="min-h-screen p-3 sm:p-4 max-w-2xl mx-auto pb-8">
-      {/* Team Header */}
+      {/* 1. Who You Are */}
       <div className="card p-4 sm:p-5 mb-3 sm:mb-4">
         <div className="flex items-start justify-between mb-2 gap-2">
           <h1 className="text-lg sm:text-xl font-bold leading-tight text-white">{team.name}</h1>
@@ -174,7 +174,7 @@ export default function TeamView() {
         <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{team.role_description}</p>
       </div>
 
-      {/* Metrics */}
+      {/* 2. Metrics */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
         {Object.entries(team.metrics).map(([key, value]) => (
           <div key={key} className="card p-2.5 sm:p-3">
@@ -192,30 +192,8 @@ export default function TeamView() {
         ))}
       </div>
 
-      {/* Secret Briefing */}
-      {team.secret_briefing && (
-        <div className="card glow-amber p-3 sm:p-4 mb-3 sm:mb-4">
-          <p className="label text-amber-400 mb-1.5">
-            {currentRound?.phase === "resolved" ? "Round Outcome — Eyes Only" : "Intel Briefing — Eyes Only"}
-          </p>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{team.secret_briefing}</p>
-        </div>
-      )}
-
-      {/* Current Phase */}
-      {currentRound && (
-        <div className={`card-bright p-3 sm:p-4 mb-3 sm:mb-4 ${currentRound.phase === "resolving" ? "glow-amber" : ""}`}>
-          <p className={`label mb-1 ${currentRound.phase === "resolving" ? "text-amber-400" : "text-blue-400"}`}>
-            {currentRound.phase.replace("_", " ")}
-          </p>
-          <p className="text-xs sm:text-sm text-slate-400">
-            {PHASE_INSTRUCTIONS[currentRound.phase]}
-          </p>
-        </div>
-      )}
-
-      {/* World State Summary */}
-      {ws && currentRound && (
+      {/* 3. World State */}
+      {ws && (
         <div className="card p-3 sm:p-4 mb-3 sm:mb-4">
           <p className="label mb-1.5">World — {ws.year}</p>
           <p className="text-xs sm:text-sm text-slate-300 mb-2 leading-relaxed">{ws.summary}</p>
@@ -227,7 +205,7 @@ export default function TeamView() {
         </div>
       )}
 
-      {/* Narrative */}
+      {/* Narrative (after resolution) */}
       {currentRound?.narrative && (
         <div className="card glow-blue p-3 sm:p-4 mb-3 sm:mb-4">
           <p className="label text-blue-400 mb-1.5">What Happened</p>
@@ -237,7 +215,17 @@ export default function TeamView() {
         </div>
       )}
 
-      {/* Action Input */}
+      {/* 4. Internal Briefing */}
+      {team.secret_briefing && (
+        <div className="card glow-amber p-3 sm:p-4 mb-3 sm:mb-4">
+          <p className="label text-amber-400 mb-1.5">
+            {currentRound?.phase === "resolved" ? "Round Outcome — Your Eyes Only" : "Internal Briefing — Your Eyes Only"}
+          </p>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{team.secret_briefing}</p>
+        </div>
+      )}
+
+      {/* 5. Action Input */}
       {currentRound?.phase === "submit" && (
         <div className={`card-bright p-3 sm:p-5 ${submitted ? "glow-green" : ""}`}>
           <p className="label mb-2 sm:mb-3">Your Actions This Round</p>
